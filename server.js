@@ -40,6 +40,16 @@ app.get("/likes/:name", async (req, res) => {
   res.json({ name, likes: result.rows[0].likes });
 });
 
+app.get("/top-liked", async (req, res) => {
+  const result = await pool.query(`
+    SELECT name, likes
+    FROM pokemon_likes
+    ORDER BY likes DESC
+    LIMIT 5
+  `);
+
+  res.json(result.rows);
+});
 
 app.post("/like", async (req, res) => {
   const { name } = req.body;
