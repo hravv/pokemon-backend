@@ -3,7 +3,8 @@ const cors = require("cors");
 const { Pool } = require("pg");
 
 const app = express();
-app.use(cors({origin: "*"}));
+app.use(cors());
+app.options("*", cors());
 app.use(express.json());
 
 // Connect to Render PostgreSQL
