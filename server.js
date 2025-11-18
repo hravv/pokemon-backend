@@ -12,7 +12,6 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-// Create per-Pokemon likes table
 async function initializeDB() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS pokemon_likes (
@@ -25,7 +24,7 @@ async function initializeDB() {
 
 initializeDB();
 
-// Get like count for one Pokémon
+
 app.get("/likes/:name", async (req, res) => {
   const { name } = req.params;
 
@@ -41,7 +40,7 @@ app.get("/likes/:name", async (req, res) => {
   res.json({ name, likes: result.rows[0].likes });
 });
 
-// Create or increment a Pokémon's like count
+
 app.post("/like", async (req, res) => {
   const { name } = req.body;
 
@@ -58,6 +57,26 @@ app.post("/like", async (req, res) => {
   );
 
   res.json({ name, likes: result.rows[0].likes });
+});
+
+
+app.post("/unlike", async (req, res) => {
+  const { name } = req.body;
+
+  await pool.query(`
+    UPDATE pokemon_likes
+    SET likes = GREATEST(likes - 1, 0)
+    WHERE name = $1
+  `, [name]);
+
+  const result = await pool.query(
+    "SELECT likes FROM pokemon_likes WHERE name = $1",
+    [name]
+  );
+
+  const currentLikes = result.rowCount === 0 ? 0 : result.rows[0].likes;
+
+  res.json({ name, likes: currentLikes });
 });
 
 const PORT = process.env.PORT || 5000;
